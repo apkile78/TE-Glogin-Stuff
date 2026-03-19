@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Navigator</title>
+
+    <style>
+    /* GLOBAL */
+    body {
+        margin: 0;
+        background: #000;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    /* TOP BAR */
+    #topBar {
+        height: 50px;
+        background: #000;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        gap: 10px;
+    }
+
+    #urlInput {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #444;
+        background: #000;
+        color: #fff;
+        border-radius: 4px;
+        outline: none;
+    }
+
+    button {
+        background: #111;
+        color: #fff;
+        border: 1px solid #444;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #222;
+    }
+
+    /* POPUP MODE BUTTONS */
+    .modeToggle {
+        background: #000;
+        color: #fff;
+        border: 1px solid #444;
+        padding: 6px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .modeToggle.active {
+        background: #fff !important;
+        color: #000 !important;
+        border-color: #fff !important;
+    }
+
+    /* EMBED MODE BUTTONS */
+    .modeBtn {
+        padding: 6px 10px;
+        background: #000;
+        border-radius: 4px;
+        cursor: pointer;
+        color: #fff;
+        border: 1px solid #444;
+    }
+
+    .modeBtn.active {
+        background: #fff !important;
+        color: #000 !important;
+        border-color: #fff !important;
+    }
+
+    /* VIEWER */
+    #viewer {
+        width: 100vw;
+        height: calc(100vh - 50px);
+        background: #000;
+    }
+
+    /* SLIDE-OUT MENU */
+    #searchContainer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 350px;
+        height: 100vh;
+        background: #000;
+        padding: 10px;
+        transform: translateX(-360px);
+        transition: 0.2s;
+        overflow-y: auto;
+        z-index: 10;
+        color: #fff;
+    }
+
+    #searchContainer.active {
+        transform: translateX(0);
+    }
+
+    /* SAVED + WORKING SITES LIST */
+    .savedItem {
+        background: #111;
+        padding: 8px;
+        margin: 5px 0;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        cursor: pointer;
+        color: #fff;
+    }
+
+    .deleteBtn {
+        color: #f33;
+        cursor: pointer;
+    }
+
+    /* AUTOCOMPLETE DROPDOWN */
+    #autocomplete {
+        position: absolute;
+        top: 50px;
+        left: 10px;
+        width: calc(100% - 20px);
+        background: #000;
+        max-height: calc(100vh - 60px);
+        overflow-y: auto;
+        border: none;
+        border-radius: 4px;
+        z-index: 20;
+    }
+
+    .autoItem {
+        padding: 8px;
+        border-bottom: 1px solid #222;
+        cursor: pointer;
+        color: #fff;
+    }
+
+    .autoItem:hover {
+        background: #111;
+    }
+    </style>
+</head>
+
+<body>
+
+    <div id="topBar">
+        <input id="urlInput" placeholder="Enter URL or search..." />
+
+        <button id="goBtn">go</button>
+        <button id="saveBtn">sve</button>
+        <button id="openBtn">mnu</button>
+        <button id="clckBtn">popt</button>
+        <button id="vtprBtn">vew</button>
+
+        <!-- Popup mode toggles -->
+        <button id="abtBtn" class="modeToggle active">abt:blnk</button>
+        <button id="blbBtn" class="modeToggle">blb</button>
+
+        <!-- Embed mode toggles -->
+        <div class="modeBtn active" data-mode="iframe">Iframe</div>
+        <div class="modeBtn" data-mode="object">Object</div>
+        <div class="modeBtn" data-mode="embed">Embed</div>
+    </div>
+
+    <!-- Autocomplete dropdown -->
+    <div id="autocomplete"></div>
+
+    <!-- Slide-out menu -->
+    <div id="searchContainer">
+        <button id="closeBtn">Close</button>
+
+        <h2>Saved Sites</h2>
+        <div id="savedSites"></div>
+
+        <h2>Working Sites</h2>
+        <div id="workingSites"></div>
+    </div>
+
+    <!-- Viewer -->
+    <div id="viewer"></div>
+
+    <script src="siteDB.js"></script>
+    <script src="script.js"></script>
+
+</body>
+</html>
