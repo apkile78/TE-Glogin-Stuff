@@ -242,8 +242,15 @@ function displayWorkingSites() {
 
 detectWorkingSites();
 
-// ABOUT:BLANK POPUP ENGINE
+// ABOUT:BLANK POPUP ENGINE (short-circuits when already in a popup)
 function openAboutBlank(url) {
+    // If we're already in a popup (about:blank navi), don't open another window.
+    // Just navigate this window instead. This avoids Chrome's popup-from-popup blocking.
+    if (window.opener) {
+        window.location.href = url;
+        return;
+    }
+
     const win = window.open("", "_blank");
 
     if (!win) {
@@ -323,16 +330,9 @@ function openBlobPopup(url) {
     window.open(blobUrl, "_blank");
 }
 
-// ⭐ FIXED POPT BUTTON (prevents popup‑from‑popup blocking)
+// POPUP BUTTONS
 function clck() {
     const url = location.href;
-
-    // If already inside a popup, don't try to open another popup
-    if (window.opener) {
-        window.location.href = url;
-        return;
-    }
-
     if (popupMode === "about") openAboutBlank(url);
     else openBlobPopup(url);
 }
