@@ -13,7 +13,7 @@ let popupMode = "about";
 let currentUrl = "";
 let coreEl = null;
 
-let workingSites = [];   // REQUIRED
+let workingSites = [];   // ⭐ REQUIRED FIX
 
 // =========================================================
 //  MENU TOGGLE
@@ -193,7 +193,7 @@ function displaySavedSites() {
 displaySavedSites();
 
 // =========================================================
-//  WORKING SITE DETECTION (CHROMEBOOK-SAFE BATCH VERSION)
+//  WORKING SITE DETECTION (FAST VERSION)
 // =========================================================
 
 function testSite(url) {
@@ -205,7 +205,7 @@ function testSite(url) {
         const timeout = setTimeout(() => {
             iframe.remove();
             resolve(false);
-        }, 800);
+        }, 800); // faster timeout
 
         iframe.onload = () => {
             clearTimeout(timeout);
@@ -226,26 +226,15 @@ function testSite(url) {
 async function detectWorkingSites() {
     workingContainer.innerHTML = "Testing sites...";
 
-    const batchSize = 15; // safe for Chromebooks
-    workingSites = [];
+    const tests = siteDB.map(site =>
+        testSite(site.url).then(ok => ({ url: site.url, ok }))
+    );
 
-    for (let i = 0; i < siteDB.length; i += batchSize) {
-        const batch = siteDB.slice(i, i + batchSize);
+    const results = await Promise.all(tests);
 
-        const results = await Promise.all(
-            batch.map(site =>
-                testSite(site.url).then(ok => ({ url: site.url, ok }))
-            )
-        );
-
-        results.forEach(r => {
-            if (r.ok) workingSites.push(r.url);
-        });
-
-        workingContainer.innerHTML = `Testing ${i + batch.length}/${siteDB.length}...`;
-
-        await new Promise(res => setTimeout(res, 50));
-    }
+    workingSites = results
+        .filter(r => r.ok)
+        .map(r => r.url);
 
     displayWorkingSites();
 }
