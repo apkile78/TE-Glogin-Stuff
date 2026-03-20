@@ -1,4 +1,3 @@
-// ELEMENTS
 const searchContainer = document.getElementById("searchContainer");
 const urlInput = document.getElementById("urlInput");
 const savedContainer = document.getElementById("savedSites");
@@ -11,17 +10,9 @@ let popupMode = "about";
 let currentUrl = "";
 let coreEl = null;
 
-// POPUP MODE TOGGLES
-document.getElementById("abtBtn").onclick = () => {
-    popupMode = "about";
-    abtBtn.classList.add("active");
-    blbBtn.classList.remove("active");
-};
-
-document.getElementById("blbBtn").onclick = () => {
-    popupMode = "blob";
-    blbBtn.classList.add("active");
-    abtBtn.classList.remove("active");
+// MENU TOGGLE
+openBtn.onclick = () => {
+    searchContainer.classList.toggle("active");
 };
 
 // AUTOCOMPLETE
@@ -115,16 +106,18 @@ function copyCoreProps(oldEl, newEl) {
 }
 
 // BASIC ACTIONS
-function closeSearch() {
-    searchContainer.classList.remove("active");
-}
-
 function loadSite() {
     let url = urlInput.value.trim();
     if (!url) return;
     if (!url.startsWith("http")) url = "https://" + url;
     updateViewer(url);
 }
+
+goBtn.onclick = loadSite;
+
+document.addEventListener("keydown", e => {
+    if (e.key === "Enter") loadSite();
+});
 
 // SAVED SITES
 function saveSite() {
@@ -139,6 +132,8 @@ function saveSite() {
         displaySavedSites();
     }
 }
+
+saveBtn.onclick = saveSite;
 
 function deleteSite(index) {
     const savedSites = JSON.parse(localStorage.getItem("savedSites")) || [];
@@ -159,7 +154,6 @@ function displaySavedSites() {
         link.className = "link";
         link.textContent = site;
 
-        // ⭐ NEW BEHAVIOR: fill search bar + close menu (NO loading)
         link.onclick = () => {
             urlInput.value = site;
             searchContainer.classList.remove("active");
@@ -178,183 +172,43 @@ function displaySavedSites() {
         savedContainer.appendChild(item);
     });
 }
+
 displaySavedSites();
 
-// WORKING SITE DETECTION
-let workingSites = [];
+// POPUP MODE
+abtBtn.onclick = () => {
+    popupMode = "about";
+    abtBtn.classList.add("active");
+    blbBtn.classList.remove("active");
+};
 
-function testSite(url) {
-    return new Promise(resolve => {
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = url;
-
-        let timeout = setTimeout(() => {
-            iframe.remove();
-            resolve(false);
-        }, 2500);
-
-        iframe.onload = () => {
-            clearTimeout(timeout);
-            iframe.remove();
-            resolve(true);
-        };
-
-        iframe.onerror = () => {
-            clearTimeout(timeout);
-            iframe.remove();
-            resolve(false);
-        };
-
-        document.body.appendChild(iframe);
-    });
-}
-
-async function detectWorkingSites() {
-    workingContainer.innerHTML = "Testing sites...";
-
-    for (const site of siteDB) {
-        const ok = await testSite(site.url);
-        if (ok) workingSites.push(site.url);
-    }
-
-    displayWorkingSites();
-}
-
-function displayWorkingSites() {
-    workingContainer.innerHTML = "";
-    workingSites.forEach(url => {
-        const item = document.createElement("div");
-        item.className = "savedItem";
-
-        const link = document.createElement("span");
-        link.className = "link";
-        link.textContent = url;
-
-        // ⭐ NEW BEHAVIOR: fill search bar + close menu (NO loading)
-        link.onclick = () => {
-            urlInput.value = url;
-            searchContainer.classList.remove("active");
-        };
-
-        item.appendChild(link);
-        workingContainer.appendChild(item);
-    });
-}
-
-detectWorkingSites();
-
-// POPUP ENGINES
-function openAboutBlank(url) {
-    const win = window.open("about:blank", "_blank");
-
-    if (!win) {
-        const a = document.createElement("a");
-        a.href = url;
-        a.target = "_blank";
-        a.rel = "noopener";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        return;
-    }
-
-    win.document.open();
-    win.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Viewer</title>
-            <style>
-                html, body {
-                    margin: 0;
-                    padding: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: black;
-                    overflow: hidden;
-                }
-                iframe {
-                    width: 100vw;
-                    height: 100vh;
-                    border: none;
-                    display: block;
-                }
-            </style>
-        </head>
-        <body>
-            <iframe src="${url}" allow="fullscreen; autoplay; gamepad"></iframe>
-        </body>
-        </html>
-    `);
-    win.document.close();
-}
-
-function openBlobPopup(url) {
-    const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Viewer</title>
-            <style>
-                html, body {
-                    margin: 0;
-                    padding: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: black;
-                    overflow: hidden;
-                }
-                iframe {
-                    width: 100vw;
-                    height: 100vh;
-                    border: none;
-                    display: block;
-                }
-            </style>
-        </head>
-        <body>
-            <iframe src="${url}" allow="fullscreen; autoplay; gamepad"></iframe>
-        </body>
-        </html>
-    `;
-
-    const blob = new Blob([html], { type: "text/html" });
-    const blobUrl = URL.createObjectURL(blob);
-    window.open(blobUrl, "_blank");
-}
+blbBtn.onclick = () => {
+    popupMode = "blob";
+    blbBtn.classList.add("active");
+    abtBtn.classList.remove("active");
+};
 
 // POPUP BUTTONS
-function clck() {
+clckBtn.onclick = () => {
     const url = location.href;
-    if (popupMode === "about") openAboutBlank(url);
-    else openBlobPopup(url);
-}
+    if (popupMode === "about") window.open(url, "_blank");
+    else {
+        const blob = new Blob([`<iframe src="${url}" style="width:100%;height:100%;border:none;"></iframe>`], { type: "text/html" });
+        window.open(URL.createObjectURL(blob), "_blank");
+    }
+};
 
-function vtpr() {
+vtprBtn.onclick = () => {
     let url = currentUrl || urlInput.value.trim();
     if (!url) return;
     if (!url.startsWith("http")) url = "https://" + url;
 
-    if (popupMode === "about") openAboutBlank(url);
-    else openBlobPopup(url);
-}
-
-// BUTTON BINDINGS
-goBtn.onclick = loadSite;
-saveBtn.onclick = saveSite;
-closeBtn.onclick = closeSearch;
-clckBtn.onclick = clck;
-vtprBtn.onclick = vtpr;
-
-// ⭐ NEW: mnu button toggles menu open/close
-openBtn.onclick = () => {
-    searchContainer.classList.toggle("active");
+    if (popupMode === "about") window.open(url, "_blank");
+    else {
+        const blob = new Blob([`<iframe src="${url}" style="width:100%;height:100%;border:none;"></iframe>`], { type: "text/html" });
+        window.open(URL.createObjectURL(blob), "_blank");
+    }
 };
 
-// KEYBOARD SHORTCUT
-document.addEventListener("keydown", e => {
-    if (e.key === "[") {
-        searchContainer.classList.toggle("active");
-    }
-});
+// CLOSE MENU
+closeBtn.onclick = () => searchContainer.classList.remove("active");
