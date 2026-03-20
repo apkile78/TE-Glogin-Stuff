@@ -10,7 +10,7 @@ const autoBox = document.getElementById("autocomplete");
 const tstBtn = document.getElementById("tstBtn");
 
 let embedMode = "iframe";
-let popupMode = "about";
+let popupMode = "about"; // abt:blnk default
 let currentUrl = "";
 let coreEl = null;
 
@@ -298,8 +298,6 @@ function updateTstButton(done = false) {
     if (done) {
         tstBtn.textContent = `tst (${testedCount}/${total})`;
         tstBtn.classList.remove("active");
-        tstBtn.style.background = "#000";
-        tstBtn.style.color = "#fff";
         return;
     }
 
@@ -307,12 +305,8 @@ function updateTstButton(done = false) {
 
     if (testingInProgress && !testingPaused) {
         tstBtn.classList.add("active");
-        tstBtn.style.background = "#fff";
-        tstBtn.style.color = "#000";
     } else {
         tstBtn.classList.remove("active");
-        tstBtn.style.background = "#000";
-        tstBtn.style.color = "#fff";
     }
 }
 
@@ -333,18 +327,13 @@ tstBtn.onclick = () => {
 };
 
 // =========================================================
-//  POPUP MODE TOGGLE (abt/blb) — FIXED
+//  POPUP MODE TOGGLE (abt/blb) — FULLY FIXED
 // =========================================================
 abtBtn.onclick = () => {
     popupMode = "about";
 
     abtBtn.classList.add("active");
     blbBtn.classList.remove("active");
-
-    abtBtn.style.background = "";
-    abtBtn.style.color = "";
-    blbBtn.style.background = "";
-    blbBtn.style.color = "";
 };
 
 blbBtn.onclick = () => {
@@ -352,15 +341,10 @@ blbBtn.onclick = () => {
 
     blbBtn.classList.add("active");
     abtBtn.classList.remove("active");
-
-    blbBtn.style.background = "";
-    blbBtn.style.color = "";
-    abtBtn.style.background = "";
-    abtBtn.style.color = "";
 };
 
 // =========================================================
-//  POPUP (popt) — NAVIGATOR POPUP, NO WHITE OUTLINE
+//  POPUP (popt) — NAVIGATOR POPUP
 // =========================================================
 clckBtn.onclick = () => {
     const navUrl = location.origin + location.pathname;
@@ -395,7 +379,7 @@ clckBtn.onclick = () => {
 };
 
 // =========================================================
-//  VIEW POPUP (vew) — CURRENT SITE POPUP, NO WHITE OUTLINE
+//  VIEW POPUP (vew) — CURRENT SITE POPUP
 // =========================================================
 vtprBtn.onclick = () => {
     let url = currentUrl || urlInput.value.trim();
