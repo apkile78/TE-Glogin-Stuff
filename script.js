@@ -8,7 +8,7 @@ const workingContainer = document.getElementById("workingSites");
 const viewer = document.getElementById("viewer");
 const autoBox = document.getElementById("autocomplete");
 
-const mnuBtn = document.getElementById("mnuBtn");
+const mnuBtn = document.getElementById("openBtn");
 const hdeBtn = document.getElementById("hdeBtn");
 
 let embedMode = "iframe";
@@ -22,18 +22,15 @@ let coreEl = null;
 let unlockStage = 0;
 let uiUnlocked = false;
 
-// Detect if this is the MAIN PAGE (not a popup)
 const isMainPage =
     !location.href.startsWith("about:blank") &&
     !location.href.startsWith("blob:");
 
-// Hide UI initially ONLY on main page
 if (isMainPage) {
     document.body.classList.add("locked");
     hideUI(true);
 }
 
-// Key sequence unlock
 document.addEventListener("keydown", e => {
     if (!isMainPage || uiUnlocked) return;
 
@@ -60,7 +57,19 @@ function hideUI(state) {
 }
 
 hdeBtn.onclick = () => hideUI(true);
-mnuBtn.onclick = () => hideUI(false);
+
+mnuBtn.onclick = () => {
+    // If UI is hidden → unhide it
+    if (document.body.classList.contains("uiHidden")) {
+        hideUI(false);
+        return;
+    }
+
+    // If UI is visible → toggle menu
+    if (uiUnlocked) {
+        searchContainer.classList.toggle("active");
+    }
+};
 
 // =========================================================
 //  POPUP MODE TOGGLES
@@ -187,7 +196,6 @@ function loadSite() {
     updateViewer(url);
 }
 
-// ENTER loads site (only after unlock)
 document.addEventListener("keydown", e => {
     if (!uiUnlocked) return;
     if (e.key === "Enter") loadSite();
@@ -438,14 +446,11 @@ closeBtn.onclick = closeSearch;
 clckBtn.onclick = clck;
 vtprBtn.onclick = vtpr;
 
-openBtn.onclick = () => {
-    if (!uiUnlocked) return;
-    searchContainer.classList.toggle("active");
-};
+openBtn.onclick = mnuBtn.onclick; // ensure no override
 
-// =========================================================
-//  KEYBOARD SHORTCUTS (DISABLED UNTIL UNLOCK)
-// =========================================================
+openBtn.onclick = mnuBtn.onclick; // safety
+
+// Keyboard shortcut for menu toggle
 document.addEventListener("keydown", e => {
     if (!uiUnlocked) return;
     if (e.key === "[") searchContainer.classList.toggle("active");
