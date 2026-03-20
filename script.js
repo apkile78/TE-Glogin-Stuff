@@ -333,32 +333,31 @@ tstBtn.onclick = () => {
 };
 
 // =========================================================
-//  POPUP MODE
+//  POPUP MODE (FIXED popt BEHAVIOR)
 // =========================================================
-abtBtn.onclick = () => {
-    popupMode = "about";
-    abtBtn.classList.add("active");
-    blbBtn.classList.remove("active");
-};
+clckBtn.onclick = () => {
+    const navUrl = location.origin + location.pathname;
 
-blbBtn.onclick = () => {
-    popupMode = "blob";
-    blbBtn.classList.add("active");
-    abtBtn.classList.remove("active");
+    if (popupMode === "about") {
+        const win = window.open("about:blank", "_blank");
+        if (win) {
+            win.document.write(`
+                <iframe src="${navUrl}" style="width:100%;height:100%;border:none;"></iframe>
+            `);
+            win.document.close();
+        }
+    } else {
+        const blob = new Blob([
+            `<iframe src="${navUrl}" style="width:100%;height:100%;border:none;"></iframe>`
+        ], { type: "text/html" });
+
+        window.open(URL.createObjectURL(blob), "_blank");
+    }
 };
 
 // =========================================================
 //  POPUP BUTTONS
 // =========================================================
-clckBtn.onclick = () => {
-    const url = location.href;
-    if (popupMode === "about") window.open(url, "_blank");
-    else {
-        const blob = new Blob([`<iframe src="${url}" style="width:100%;height:100%;border:none;"></iframe>`], { type: "text/html" });
-        window.open(URL.createObjectURL(blob), "_blank");
-    }
-};
-
 vtprBtn.onclick = () => {
     let url = currentUrl || urlInput.value.trim();
     if (!url) return;
