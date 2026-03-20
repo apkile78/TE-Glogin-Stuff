@@ -13,6 +13,46 @@
         overflow: hidden;
     }
 
+    /* LOCKED MODE (main page only) */
+    body.locked #topBar,
+    body.locked #viewer,
+    body.locked #searchContainer,
+    body.locked #autocomplete {
+        display: none !important;
+    }
+
+    body.locked {
+        background: #000;
+    }
+
+    /* UI HIDDEN MODE */
+    body.uiHidden #topBar,
+    body.uiHidden #searchContainer,
+    body.uiHidden #autocomplete {
+        display: none !important;
+    }
+
+    /* Viewer stays visible in uiHidden mode */
+    body.uiHidden #viewer {
+        display: block !important;
+    }
+
+    /* mnu button invisible unless hovered when UI is hidden */
+    body.uiHidden #openBtn {
+        opacity: 0;
+        transition: opacity 0.15s;
+    }
+
+    body.uiHidden #openBtn:hover {
+        opacity: 1;
+    }
+
+    /* DISABLED BUTTONS */
+    .disabled {
+        opacity: 0.3 !important;
+        pointer-events: none !important;
+    }
+
     /* TOP BAR */
     #topBar {
         height: 50px;
