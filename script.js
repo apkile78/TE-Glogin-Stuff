@@ -1,3 +1,6 @@
+// =========================================================
+//  GLOBAL ELEMENTS
+// =========================================================
 const searchContainer = document.getElementById("searchContainer");
 const urlInput = document.getElementById("urlInput");
 const savedContainer = document.getElementById("savedSites");
@@ -10,12 +13,16 @@ let popupMode = "about";
 let currentUrl = "";
 let coreEl = null;
 
-// MENU TOGGLE
+// =========================================================
+//  MENU TOGGLE
+// =========================================================
 openBtn.onclick = () => {
     searchContainer.classList.toggle("active");
 };
 
-// AUTOCOMPLETE
+// =========================================================
+//  AUTOCOMPLETE
+// =========================================================
 let autoTimer = null;
 
 urlInput.addEventListener("input", () => {
@@ -45,7 +52,9 @@ function runAutocomplete() {
     }
 }
 
-// EMBED MODE SWITCHING
+// =========================================================
+//  EMBED MODE SWITCHING
+// =========================================================
 document.querySelectorAll(".modeBtn").forEach(btn => {
     btn.addEventListener("click", () => {
         document.querySelectorAll(".modeBtn").forEach(b => b.classList.remove("active"));
@@ -55,7 +64,9 @@ document.querySelectorAll(".modeBtn").forEach(btn => {
     });
 });
 
-// VIEWER
+// =========================================================
+//  VIEWER
+// =========================================================
 function updateViewer(url) {
     currentUrl = url;
     if (!url) {
@@ -105,7 +116,9 @@ function copyCoreProps(oldEl, newEl) {
     if (oldEl.data) newEl.data = oldEl.data;
 }
 
-// BASIC ACTIONS
+// =========================================================
+//  BASIC ACTIONS
+// =========================================================
 function loadSite() {
     let url = urlInput.value.trim();
     if (!url) return;
@@ -119,7 +132,9 @@ document.addEventListener("keydown", e => {
     if (e.key === "Enter") loadSite();
 });
 
-// SAVED SITES
+// =========================================================
+//  SAVED SITES
+// =========================================================
 function saveSite() {
     const urlToSave = currentUrl || urlInput.value.trim();
     if (!urlToSave) return;
@@ -175,7 +190,78 @@ function displaySavedSites() {
 
 displaySavedSites();
 
-// POPUP MODE
+// =========================================================
+//  WORKING SITE DETECTION (FAST VERSION)
+// =========================================================
+
+function testSite(url) {
+    return new Promise(resolve => {
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = url;
+
+        const timeout = setTimeout(() => {
+            iframe.remove();
+            resolve(false);
+        }, 800); // faster timeout
+
+        iframe.onload = () => {
+            clearTimeout(timeout);
+            iframe.remove();
+            resolve(true);
+        };
+
+        iframe.onerror = () => {
+            clearTimeout(timeout);
+            iframe.remove();
+            resolve(false);
+        };
+
+        document.body.appendChild(iframe);
+    });
+}
+
+async function detectWorkingSites() {
+    workingContainer.innerHTML = "Testing sites...";
+
+    const tests = siteDB.map(site =>
+        testSite(site.url).then(ok => ({ url: site.url, ok }))
+    );
+
+    const results = await Promise.all(tests);
+
+    workingSites = results
+        .filter(r => r.ok)
+        .map(r => r.url);
+
+    displayWorkingSites();
+}
+
+function displayWorkingSites() {
+    workingContainer.innerHTML = "";
+    workingSites.forEach(url => {
+        const item = document.createElement("div");
+        item.className = "savedItem";
+
+        const link = document.createElement("span");
+        link.className = "link";
+        link.textContent = url;
+
+        link.onclick = () => {
+            urlInput.value = url;
+            searchContainer.classList.remove("active");
+        };
+
+        item.appendChild(link);
+        workingContainer.appendChild(item);
+    });
+}
+
+detectWorkingSites();
+
+// =========================================================
+//  POPUP MODE
+// =========================================================
 abtBtn.onclick = () => {
     popupMode = "about";
     abtBtn.classList.add("active");
@@ -188,7 +274,9 @@ blbBtn.onclick = () => {
     abtBtn.classList.remove("active");
 };
 
-// POPUP BUTTONS
+// =========================================================
+//  POPUP BUTTONS
+// =========================================================
 clckBtn.onclick = () => {
     const url = location.href;
     if (popupMode === "about") window.open(url, "_blank");
@@ -210,5 +298,7 @@ vtprBtn.onclick = () => {
     }
 };
 
-// CLOSE MENU
+// =========================================================
+//  CLOSE MENU
+// =========================================================
 closeBtn.onclick = () => searchContainer.classList.remove("active");
