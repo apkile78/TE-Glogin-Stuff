@@ -1,6 +1,4 @@
-// =========================================================
 //  GLOBAL ELEMENTS
-// =========================================================
 const searchContainer = document.getElementById("searchContainer");
 const urlInput = document.getElementById("urlInput");
 const savedContainer = document.getElementById("savedSites");
@@ -23,16 +21,12 @@ let testingPaused = false;
 let testingInProgress = false;
 let testedCount = 0;
 
-// =========================================================
 //  MENU TOGGLE
-// =========================================================
 openBtn.onclick = () => {
     searchContainer.classList.toggle("active");
 };
 
-// =========================================================
 //  AUTOCOMPLETE
-// =========================================================
 let autoTimer = null;
 
 urlInput.addEventListener("input", () => {
@@ -62,9 +56,7 @@ function runAutocomplete() {
     }
 }
 
-// =========================================================
 //  EMBED MODE SWITCHING
-// =========================================================
 document.querySelectorAll(".modeBtn").forEach(btn => {
     btn.addEventListener("click", () => {
         document.querySelectorAll(".modeBtn").forEach(b => b.classList.remove("active"));
@@ -74,9 +66,7 @@ document.querySelectorAll(".modeBtn").forEach(btn => {
     });
 });
 
-// =========================================================
 //  VIEWER
-// =========================================================
 function updateViewer(url) {
     currentUrl = url;
     if (!url) {
@@ -126,9 +116,7 @@ function copyCoreProps(oldEl, newEl) {
     if (oldEl.data) newEl.data = oldEl.data;
 }
 
-// =========================================================
 //  BASIC ACTIONS
-// =========================================================
 function loadSite() {
     let url = urlInput.value.trim();
     if (!url) return;
@@ -142,9 +130,7 @@ document.addEventListener("keydown", e => {
     if (e.key === "Enter") loadSite();
 });
 
-// =========================================================
 //  SAVED SITES
-// =========================================================
 function saveSite() {
     const urlToSave = currentUrl || urlInput.value.trim();
     if (!urlToSave) return;
@@ -200,9 +186,7 @@ function displaySavedSites() {
 
 displaySavedSites();
 
-// =========================================================
 //  WORKING SITE DETECTION
-// =========================================================
 function testSite(url) {
     return new Promise(resolve => {
         const iframe = document.createElement("iframe");
@@ -329,9 +313,7 @@ tstBtn.onclick = () => {
     }
 };
 
-// =========================================================
 //  POPUP MODE TOGGLE
-// =========================================================
 abtBtn.onclick = () => {
     popupMode = "about";
     abtBtn.classList.add("active");
@@ -344,9 +326,7 @@ blbBtn.onclick = () => {
     abtBtn.classList.remove("active");
 };
 
-// =========================================================
 //  POPUP (popt)
-// =========================================================
 clckBtn.onclick = () => {
     const navUrl = location.origin + location.pathname;
 
@@ -379,9 +359,7 @@ clckBtn.onclick = () => {
     }
 };
 
-// =========================================================
 //  VIEW POPUP (vew)
-// =========================================================
 vtprBtn.onclick = () => {
     let url = currentUrl || urlInput.value.trim();
     if (!url) return;
@@ -416,14 +394,10 @@ vtprBtn.onclick = () => {
     }
 };
 
-// =========================================================
 //  CLOSE MENU
-// =========================================================
 closeBtn.onclick = () => searchContainer.classList.remove("active");
 
-// =========================================================
 //  UI HIDE / REVEAL SYSTEM (NEW)
-// =========================================================
 
 // Hide UI
 hdeBtn.onclick = () => {
