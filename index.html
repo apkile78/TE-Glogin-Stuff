@@ -46,6 +46,7 @@ button.active {
     box-sizing: border-box;
     gap: 6px;
     transition: 0.25s ease;
+    overflow: visible; /* IMPORTANT FIX */
 }
 
 /* Search bar (leftmost) */
@@ -67,14 +68,14 @@ button.active {
 —————————————————————————————— */
 #autocomplete {
     position: absolute;
-    top: 60px;
+    top: 60px; /* directly under top bar */
     left: 10px;
     width: calc(100% - 20px);
-    max-height: 200px;
+    max-height: 250px;
     overflow-y: auto;
     background: #111;
     border: 1px solid #333;
-    z-index: 9997;
+    z-index: 9999; /* stays above everything */
 }
 
 .autoItem {
@@ -135,6 +136,8 @@ button.active {
     width: 100%;
     height: calc(100vh - 60px);
     background: #000;
+    position: relative; /* IMPORTANT FIX */
+    z-index: 1;         /* keeps autocomplete above */
 }
 
 /* ——————————————————————————————
