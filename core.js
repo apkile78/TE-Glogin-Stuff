@@ -88,22 +88,27 @@ document.getElementById("vtprBtn").onclick = () => {
 };
 
 // ——————————————————————————————
-// THE PLUGIN BRIDGE
+// THE PLUGIN BRIDGE (Updated for CORS safety)
 // ——————————————————————————————
 document.getElementById("plgBtn").onclick = async () => {
-    if (!coreEl) return alert("Load a site first!");
     try {
+        // 1. Fetch the plugin code
         const response = await fetch('./plugin/plugin-core.js');
+        
+        if (!response.ok) {
+            throw new Error("Plugin file not found (404). Did you upload the 'plugin' folder to this branch?");
+        }
+        
         const code = await response.text();
         
-        // This injects the code directly into your current iframe/object
-        coreEl.contentWindow.eval(code);
+        // 2. Inject into the MAIN window. This bypasses the iframe CORS block.
+        window.eval(code);
         
-        // Close the menu smoothly using YOUR native CSS class
+        // 3. Close the menu smoothly using your native CSS class
         document.getElementById("searchContainer").classList.remove("active");
         
     } catch (e) {
-        alert("Injection failed. Try OBJ mode.");
+        alert("Injection Error: " + e.message);
         console.error(e);
     }
 };
