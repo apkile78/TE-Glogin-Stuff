@@ -35,9 +35,10 @@ function updateViewer(url) {
     }
 
     // FIX: sandbox and allow attributes enable Google Sign-In popups and session saving
-    // allow-popups-to-escape-sandbox is the critical flag for Hordes.io login
+    // allow-popups-to-escape-sandbox is the critical flag for Hordes.io logic - and again...
+    // Ensure these attributes are present in your core.js updateViewer function
     coreEl.setAttribute('sandbox', 'allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-scripts allow-same-origin allow-storage-access-by-user-activation');
-    coreEl.setAttribute('allow', 'cross-origin-isolated; autoplay; encrypted-media; fullscreen; clipboard-read; clipboard-write');
+    coreEl.setAttribute('allow', 'cross-origin-isolated; autoplay; encrypted-media; fullscreen; clipboard-read; clipboard-write; storage-access');
 
     if (embedMode === "js") {
         const doc = coreEl.contentWindow.document;
@@ -72,12 +73,11 @@ abtBtn.onclick = () => { popupMode = "about"; abtBtn.classList.add("active"); bl
 blbBtn.onclick = () => { popupMode = "blob"; blbBtn.classList.add("active"); abtBtn.classList.remove("active"); };
 
 function launchStealth(targetUrl) {
-    // Note: We use win.location.href instead of document.write to ensure
-    // the window has a real 'Origin', which Google requires for login
-    const win = window.open("about:blank", "_blank");
-    if (win) {
-        win.location.href = targetUrl;
-    } else {
+    // We open a real window instead of a 'blob' or 'document.write'
+    // This allows the browser to share the login cookies from your main tabs
+    const win = window.open(targetUrl, '_blank'); 
+    
+    if (!win) {
         alert("Popup blocked! Please allow popups for this site.");
     }
 }
