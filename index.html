@@ -1,229 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Your Game Navigator</title>
-
-<style>
-/* ——————————————————————————————
-   GLOBAL
-—————————————————————————————— */
-body {
-    margin: 0;
-    background: #000;
-    color: #fff;
-    font-family: sans-serif;
-}
-
-/* ——————————————————————————————
-   BUTTON STYLING
-—————————————————————————————— */
-button {
-    background: #000;
-    color: #fff;
-    border: 1px solid #fff;
-    padding: 6px 10px;
-    margin-right: 6px;
-    cursor: pointer;
-}
-
-button.active {
-    background: #fff;
-    color: #000;
-    border: 1px solid #000;
-}
-
-/* ——————————————————————————————
-   TOP BAR
-—————————————————————————————— */
-#topBar {
-    width: 100%;
-    height: 60px;
-    background: #111;
-    display: flex;
-    align-items: center;
-    padding: 0 10px;
-    box-sizing: border-box;
-    gap: 6px;
-    overflow: visible;
-}
-
-/* Search bar */
-#urlInput {
-    flex: 1;
-    padding: 6px;
-    background: #000;
-    border: 1px solid #fff;
-    color: #fff;
-}
-
-.group-gap {
-    width: 4px;
-}
-
-/* ——————————————————————————————
-   AUTOCOMPLETE
-—————————————————————————————— */
-#autocomplete {
-    position: absolute;
-    top: 60px;
-    left: 10px;
-    width: calc(100% - 20px);
-    max-height: 250px;
-    overflow-y: auto;
-    background: #111;
-    border: 1px solid #333;
-    z-index: 99999;
-}
-
-.autoItem {
-    padding: 6px;
-    border-bottom: 1px solid #333;
-    cursor: pointer;
-}
-.autoItem:hover {
-    background: #333;
-}
-
-/* ——————————————————————————————
-   SIDEBAR
-—————————————————————————————— */
-#searchContainer {
-    width: 300px;
-    background: #111;
-    height: 100vh;
-    position: fixed;
-    left: -300px;
-    top: 0;
-    padding: 10px;
-    box-sizing: border-box;
-    transition: 0.25s ease;
-    z-index: 9998;
-}
-#searchContainer.active {
-    left: 0;
-}
-
-#savedSites {
-    max-height: 200px;
-    overflow-y: auto;
-    background: #181818;
-    border: 1px solid #333;
-    margin-top: 6px;
-}
-
-.savedItem {
-    padding: 6px;
-    border-bottom: 1px solid #333;
-    cursor: pointer;
-}
-.savedItem:hover {
-    background: #333;
-}
-
-.deleteBtn {
-    float: right;
-    color: #f44;
-    cursor: pointer;
-}
-
-/* ——————————————————————————————
-   VIEWER
-—————————————————————————————— */
-#viewer {
-    width: 100%;
-    height: calc(100vh - 60px);
-    background: #000;
-    position: relative;
-    z-index: 1;
-}
-
-/* ——————————————————————————————
-   UI-HIDE SYSTEM
-—————————————————————————————— */
-body.uiHidden #topBar {
-    transform: translateY(-60px);
-}
-
-#mnuReveal {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    padding: 4px 8px;
-    font-size: 12px;
-    opacity: 0;
-    pointer-events: none;
-    background: #000;
-    border: 1px solid #fff;
-    color: #fff;
-    border-radius: 4px;
-    transition: opacity 0.15s;
-    z-index: 9999;
-}
-
-body.uiHidden #mnuReveal {
-    pointer-events: auto;
-}
-body.uiHidden #mnuReveal:hover {
-    opacity: 1;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<!-- ——————————————————————————————
-     TOP BAR
-—————————————————————————————— -->
-<div id="topBar">
+    <div id="topBar">
+        <input id="urlInput" placeholder="Enter URL or search...">
+        <button id="goBtn">Go</button>
+        <button id="saveBtn">Save</button>
+        <button id="openBtn">Menu</button>
+        
+        <div style="width: 2px; height: 20px; background: #333; margin: 0 5px;"></div>
 
-    <input id="urlInput" placeholder="Enter URL...">
-    <button id="goBtn">Go</button>
-    <button id="saveBtn">Save</button>
-    <button id="openBtn">Menu</button>
+        <button id="clckBtn">popt</button>
+        <button id="vtprBtn">vew</button>
 
-    <button id="clckBtn">popt</button>
-    <button id="vtprBtn">vew</button>
+        <button id="abtBtn" class="active">abt</button>
+        <button id="blbBtn">blb</button>
 
-    <button id="abtBtn" class="active">abt:blnk</button>
-    <button id="blbBtn">blb</button>
+        <button class="modeBtn active" data-mode="iframe">IFR</button>
+        <button class="modeBtn" data-mode="object">OBJ</button>
+    </div>
 
-    <div class="group-gap"></div>
+    <div id="autocomplete"></div>
 
-    <button class="modeBtn active" data-mode="iframe">iframe</button>
-    <button class="modeBtn" data-mode="object">js</button>
-    <button class="modeBtn" data-mode="embed">embed</button>
+    <div id="searchContainer">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Bookmarks</h3>
+            <button id="closeBtn">X</button>
+        </div>
+        
+        <button id="hdeBtn" style="width: 100%; margin: 15px 0;">Hide UI (Ghost Mode)</button>
 
-</div>
+        <div id="savedSites"></div>
+    </div>
 
-<div id="autocomplete"></div>
+    <div id="viewer"></div>
 
-<!-- ——————————————————————————————
-     SIDEBAR
-—————————————————————————————— -->
-<div id="searchContainer">
-    <button id="closeBtn">Close</button>
-    <button id="hdeBtn">hde</button>
+    <button id="mnuReveal">MENU</button>
 
-    <h3>Saved Sites</h3>
-    <div id="savedSites"></div>
-</div>
-
-<!-- ——————————————————————————————
-     VIEWER
-—————————————————————————————— -->
-<div id="viewer"></div>
-
-<button id="mnuReveal">mnu</button>
-
-<!-- ——————————————————————————————
-     SCRIPTS (MODULAR)
-—————————————————————————————— -->
-<script src="siteDB.js"></script>
-<script src="core.js"></script>
-<script src="menu.js"></script>
-<script src="autocomplete.js"></script>
-<script src="main.js"></script>
+    <script src="siteDB.js"></script>
+    <script src="core.js"></script>
+    <script src="menu.js"></script>
+    <script src="autocomplete.js"></script>
+    <script src="main.js"></script>
 
 </body>
 </html>
