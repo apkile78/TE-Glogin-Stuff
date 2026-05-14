@@ -1,88 +1,93 @@
-const urlInput = document.getElementById("urlInput");
-const viewer = document.getElementById("viewer");
+/* CORE LOGIC - uplugin branch */
 
-let embedMode = "iframe";
-let popupMode = "about";
-window.currentUrl = ""; 
-let coreEl = null;
+let embedMode = "iframe"; // Default mode
 
-// ——————————————————————————————
-// MODE SWITCHING
-// ——————————————————————————————
-document.querySelectorAll(".modeBtn").forEach(btn => {
-    btn.addEventListener("click", () => {
-        document.querySelectorAll(".modeBtn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        embedMode = btn.dataset.mode;
-        if (window.currentUrl) updateViewer(window.currentUrl);
-    });
-});
+// Function to switch modes
+function setMode(mode) {
+    embedMode = mode;
+    console.log("Mode set to: " + mode);
+    // Visual feedback: remove active class from all, add to current
+    document.querySelectorAll('#topBar button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(mode + 'Btn').classList.add('active');
+}
 
-// ——————————————————————————————
-// RENDER ENGINE
-// ——————————————————————————————
+// THE VIEWER ENGINE
 function updateViewer(url) {
     window.currentUrl = url;
-    if (!url) { viewer.innerHTML = ""; coreEl = null; return; }
+    const viewer = document.getElementById("viewer");
+    if (!url) { viewer.innerHTML = ""; return; }
 
-    if (!coreEl) {
-        coreEl = document.createElement("iframe");
-        viewer.innerHTML = "";
-        viewer.appendChild(coreEl);
-    }
-
+    viewer.innerHTML = "";
+    
     if (embedMode === "js") {
+        const coreEl = document.createElement("iframe");
+        viewer.appendChild(coreEl);
         const doc = coreEl.contentWindow.document;
         doc.open();
-        doc.write(`<html><body style="background:#000;color:#fff;font-family:monospace;padding:10px;">
-            <script>try{ ${url} }catch(e){ document.write('<span style="color:red">ERR: '+e.message+'</span>'); }<\/script>
-        </body></html>`);
+        // This ensures the plugin has a 'body' and 'head' to attach to
+        doc.write(`
+            <!DOCTYPE html>
+            <html>
+            <head><style>body{background:#000;color:#fff;margin:0;overflow:hidden;font-family:monospace;}</style></head>
+            <body>
+                <script>${url}<\/script>
+            </body>
+            </html>
+        `);
         doc.close();
     } else {
-        const tag = embedMode === "iframe" ? "IFRAME" : "OBJECT";
-        if (coreEl.tagName !== tag) {
-            const newEl = document.createElement(tag.toLowerCase());
-            if (tag === "OBJECT") newEl.type = "text/html";
-            coreEl.replaceWith(newEl);
-            coreEl = newEl;
+        const tag = embedMode === "iframe" ? "iframe" : "object";
+        const coreEl = document.createElement(tag);
+        
+        if (tag === "iframe") {
+            // Sandbox helps bypass some security headers
+            coreEl.setAttribute("sandbox", "allow-forms allow-modals allow-popups allow-scripts allow-same-origin");
+            coreEl.src = url;
+        } else {
+            coreEl.type = "text/html";
+            coreEl.data = url;
         }
-        if (embedMode === "iframe") coreEl.src = url;
-        else coreEl.data = url;
+        
+        coreEl.style.width = "100%";
+        coreEl.style.height = "100%";
+        coreEl.style.border = "none";
+        viewer.appendChild(coreEl);
     }
 }
 
-function loadSite() {
-    let url = urlInput.value.trim();
-    if (!url) return;
-    if (!url.startsWith("http") && embedMode !== "js") url = "https://" + url;
+// THE PLUGIN INJECTOR (The Bridge)
+async function devInject() {
+    const frame = document.querySelector("#viewer iframe");
+    // If OBJ mode is used, we look for 'object' instead of 'iframe'
+    const target = frame || document.querySelector("#viewer object");
+    
+    if (!target) return alert("Load a site first!");
+
+    try {
+        // Fetches your standalone plugin file from your GitHub branch
+        const response = await fetch('./plugin/plugin-core.js');
+        if (!response.ok) throw new Error("Plugin file not found at ./plugin/plugin-core.js");
+        
+        const code = await response.text();
+        
+        // Injecting the code into the viewer's window context
+        const win = target.contentWindow || target.data; 
+        target.contentWindow.eval(code);
+        
+        console.log("Plugin Engine Injected Successfully.");
+    } catch (e) {
+        console.error("Injection error:", e);
+        alert("Security Block: This site forbids injection. Try 'JS' or 'OBJ' mode.");
+    }
+}
+
+// Event Listeners for Buttons
+document.getElementById("ifrBtn").onclick = () => setMode("iframe");
+document.getElementById("jsBtn").onclick = () => setMode("js");
+document.getElementById("objBtn").onclick = () => setMode("object");
+document.getElementById("plgBtn").onclick = devInject; // Link the PLG button
+
+document.getElementById("goBtn").onclick = () => {
+    const url = document.getElementById("urlInput").value;
     updateViewer(url);
-}
-
-document.getElementById("goBtn").onclick = loadSite;
-urlInput.onkeydown = e => { if (e.key === "Enter") loadSite(); };
-
-// ——————————————————————————————
-// STEALTH POPUPS
-// ——————————————————————————————
-const abtBtn = document.getElementById("abtBtn");
-const blbBtn = document.getElementById("blbBtn");
-
-abtBtn.onclick = () => { popupMode = "about"; abtBtn.classList.add("active"); blbBtn.classList.remove("active"); };
-blbBtn.onclick = () => { popupMode = "blob"; blbBtn.classList.add("active"); abtBtn.classList.remove("active"); };
-
-function launchStealth(targetUrl) {
-    const html = `<html><body style="margin:0;background:#000;"><iframe src="${targetUrl}" style="width:100vw;height:100vh;border:none;"></iframe></body></html>`;
-    if (popupMode === "about") {
-        const win = window.open("about:blank", "_blank");
-        win.document.write(html); win.document.close();
-    } else {
-        const blob = new Blob([html], { type: "text/html" });
-        window.open(URL.createObjectURL(blob), "_blank");
-    }
-}
-
-document.getElementById("clckBtn").onclick = () => launchStealth(window.location.href);
-document.getElementById("vtprBtn").onclick = () => {
-    let url = window.currentUrl || urlInput.value.trim();
-    if (url) launchStealth(url.startsWith("http") ? url : "https://" + url);
 };
