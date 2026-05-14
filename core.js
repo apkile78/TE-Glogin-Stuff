@@ -19,17 +19,25 @@ document.querySelectorAll(".modeBtn").forEach(btn => {
 });
 
 // ——————————————————————————————
-// RENDER ENGINE
+// RENDER ENGINE (Updated for Auth Fix)
 // ——————————————————————————————
 function updateViewer(url) {
     window.currentUrl = url;
     if (!url) { viewer.innerHTML = ""; coreEl = null; return; }
 
-    if (!coreEl) {
-        coreEl = document.createElement("iframe");
+    const tag = embedMode === "iframe" ? "IFRAME" : (embedMode === "object" ? "OBJECT" : "IFRAME");
+    
+    if (!coreEl || coreEl.tagName !== tag) {
+        coreEl = document.createElement(tag.toLowerCase());
+        if (tag === "OBJECT") coreEl.type = "text/html";
         viewer.innerHTML = "";
         viewer.appendChild(coreEl);
     }
+
+    // FIX: sandbox and allow attributes enable Google Sign-In popups and session saving
+    // allow-popups-to-escape-sandbox is the critical flag for Hordes.io login
+    coreEl.setAttribute('sandbox', 'allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-scripts allow-same-origin allow-storage-access-by-user-activation');
+    coreEl.setAttribute('allow', 'cross-origin-isolated; autoplay; encrypted-media; fullscreen; clipboard-read; clipboard-write');
 
     if (embedMode === "js") {
         const doc = coreEl.contentWindow.document;
@@ -39,13 +47,6 @@ function updateViewer(url) {
         </body></html>`);
         doc.close();
     } else {
-        const tag = embedMode === "iframe" ? "IFRAME" : "OBJECT";
-        if (coreEl.tagName !== tag) {
-            const newEl = document.createElement(tag.toLowerCase());
-            if (tag === "OBJECT") newEl.type = "text/html";
-            coreEl.replaceWith(newEl);
-            coreEl = newEl;
-        }
         if (embedMode === "iframe") coreEl.src = url;
         else coreEl.data = url;
     }
@@ -62,7 +63,7 @@ document.getElementById("goBtn").onclick = loadSite;
 urlInput.onkeydown = e => { if (e.key === "Enter") loadSite(); };
 
 // ——————————————————————————————
-// STEALTH POPUPS
+// STEALTH POPUPS (Updated for Auth Fix)
 // ——————————————————————————————
 const abtBtn = document.getElementById("abtBtn");
 const blbBtn = document.getElementById("blbBtn");
@@ -71,17 +72,17 @@ abtBtn.onclick = () => { popupMode = "about"; abtBtn.classList.add("active"); bl
 blbBtn.onclick = () => { popupMode = "blob"; blbBtn.classList.add("active"); abtBtn.classList.remove("active"); };
 
 function launchStealth(targetUrl) {
-    const html = `<html><body style="margin:0;background:#000;"><iframe src="${targetUrl}" style="width:100vw;height:100vh;border:none;"></iframe></body></html>`;
-    if (popupMode === "about") {
-        const win = window.open("about:blank", "_blank");
-        win.document.write(html); win.document.close();
+    // Note: We use win.location.href instead of document.write to ensure
+    // the window has a real 'Origin', which Google requires for login
+    const win = window.open("about:blank", "_blank");
+    if (win) {
+        win.location.href = targetUrl;
     } else {
-        const blob = new Blob([html], { type: "text/html" });
-        window.open(URL.createObjectURL(blob), "_blank");
+        alert("Popup blocked! Please allow popups for this site.");
     }
 }
 
-document.getElementById("clckBtn").onclick = () => launchStealth(window.location.href);
+document.getElementById("clckBtn").onclick = () => { if (window.currentUrl) launchStealth(window.currentUrl); };
 document.getElementById("vtprBtn").onclick = () => {
     let url = window.currentUrl || urlInput.value.trim();
     if (url) launchStealth(url.startsWith("http") ? url : "https://" + url);
